@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>专题展示与活动组织 · 实时打分系统</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#eef2f8;color:#1f2937;font-size:16px;line-height:1.6;overscroll-behavior-y:contain}
+#app{max-width:680px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+header{position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:6px;background:#fff;padding:8px 10px;padding-top:calc(8px + env(safe-area-inset-top));border-bottom:1px solid #e5e7eb;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+#backBtn{width:44px;height:44px;border:none;background:transparent;font-size:28px;line-height:1;color:#374151;border-radius:10px;cursor:pointer;font-family:inherit}
+#backBtn:active{background:#f3f4f6}
+#ttl{flex:1;text-align:center;font-weight:700;font-size:17px}
+main{flex:1;padding:14px 12px 60px}
+.card{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px rgba(17,24,39,.06)}
+.lbl{font-size:14px;color:#6b7280;margin-bottom:10px;font-weight:600}
+.sub{font-size:13px;color:#6b7280}
+.btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;border-radius:14px;border:1.5px solid #d1d5db;background:#fff;color:#1f2937;font-size:17px;font-weight:600;margin-bottom:10px;padding:10px 14px;font-family:inherit;cursor:pointer;transition:transform .12s}
+.btn:active{transform:scale(.98)}
+.btn:last-child{margin-bottom:0}
+.btn.primary{background:#2563eb;border-color:#2563eb;color:#fff}
+.btn.success{background:#059669;border-color:#059669;color:#fff}
+.btn.danger{background:#fff;border-color:#fca5a5;color:#dc2626}
+.btn.ghost{background:#f3f4f6;border-color:#e5e7eb}
+.btn:disabled{opacity:.38;transform:none}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid2 .btn{margin-bottom:0}
+.inp{width:100%;height:50px;border-radius:12px;border:1.5px solid #d1d5db;padding:0 14px;font-size:16px;font-family:inherit;outline:none}
+.inp:focus{border-color:#2563eb}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:6px}
+.tag.topic{background:#dbeafe;color:#1d4ed8}
+.tag.activity{background:#d1fae5;color:#047857}
+.mini{border-radius:10px;border:1.5px solid #d1d5db;background:#fff;color:#374151;font-size:13px;font-weight:700;padding:8px 12px;font-family:inherit;cursor:pointer;white-space:nowrap}
+.mini.primary{background:#2563eb;border-color:#2563eb;color:#fff}
+.mini.danger{border-color:#fca5a5;color:#dc2626}
+.hero{text-align:center;padding:30px 0 6px}
+.hero .ic{font-size:46px}
+.hero h1{font-size:22px;margin:10px 0 4px}
+.hero p{color:#6b7280;margin:0;font-size:14px}
+.group-picker{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.group-picker button{height:54px;border-radius:12px;border:2px solid #e5e7eb;background:#fff;font-size:16px;font-weight:700;color:#374151;font-family:inherit;cursor:pointer}
+.group-picker button.on{background:#2563eb;border-color:#2563eb;color:#fff;box-shadow:0 4px 12px rgba(37,99,235,.3)}
+.entry{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:18px 16px;border-radius:16px;border:none;color:#fff;font-family:inherit;margin-bottom:12px;cursor:pointer}
+.entry:active{transform:scale(.98)}
+.entry.topic{background:linear-gradient(135deg,#3b82f6,#1d4ed8);box-shadow:0 6px 18px rgba(37,99,235,.3)}
+.entry.activity{background:linear-gradient(135deg,#10b981,#047857);box-shadow:0 6px 18px rgba(5,150,105,.3)}
+.entry .ic{font-size:30px}
+.entry .tx{font-size:19px;font-weight:700;display:flex;flex-direction:column}
+.entry .tx small{font-size:12px;font-weight:400;opacity:.85;margin-top:3px}
+.obj-item{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;border:1.5px solid #e5e7eb;margin-bottom:10px;background:#fff;cursor:pointer}
+.obj-item:active{background:#f9fafb}
+.obj-item .nm{flex:1;font-weight:700;font-size:16px}
+.obj-item .st{font-size:13px;color:#6b7280}
+.obj-item .st.done{color:#059669;font-weight:700}
+.obj-item .arrow{font-size:20px;color:#9ca3af}
+.wiz-count{display:flex;justify-content:space-between;font-size:14px;color:#6b7280;font-weight:600;margin-bottom:6px}
+.bar{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin-bottom:16px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#60a5fa,#2563eb);border-radius:4px;transition:width .25s}
+.group-tag{display:inline-block;background:#eff6ff;color:#1d4ed8;font-size:13px;font-weight:700;padding:4px 10px;border-radius:8px;margin-bottom:8px}
+.q-title{font-size:19px;margin:0 0 14px;line-height:1.45;font-weight:800}
+.hint{border-radius:14px;padding:12px 14px;margin-bottom:10px;font-size:14px;line-height:1.65}
+.hint.good{background:#f0fdf4;border:1px solid #bbf7d0}
+.hint.bad{background:#fef2f2;border:1px solid #fecaca}
+.hint .h-t{font-weight:800;font-size:13px;margin-bottom:5px}
+.hint.good .h-t{color:#047857}
+.hint.bad .h-t{color:#b91c1c}
+.hint p{margin:0;color:#374151}
+.score-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:14px 0 6px}
+.score-grid button{height:50px;border-radius:12px;border:2px solid #e5e7eb;background:#fff;font-size:18px;font-weight:800;color:#374151;font-family:inherit;cursor:pointer;transition:transform .1s}
+.score-grid button:active{transform:scale(.94)}
+.score-grid button.on{background:#2563eb;border-color:#2563eb;color:#fff;box-shadow:0 4px 12px rgba(37,99,235,.35);transform:scale(1.04)}
+.wiz-nav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.wiz-nav .btn{margin-bottom:0}
+.big-score{font-size:56px;font-weight:900;color:#2563eb;text-align:center;line-height:1.1;font-variant-numeric:tabular-nums}
+.big-score small{font-size:20px;font-weight:700;color:#6b7280;margin-left:4px}
+.calc-line{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px dashed #e5e7eb;font-size:15px;gap:10px}
+.calc-line:last-child{border-bottom:none}
+.calc-line b{font-variant-numeric:tabular-nums}
+.dim-block{margin-bottom:14px}
+.dim-block .dh{font-size:13px;font-weight:800;color:#1d4ed8;background:#eff6ff;padding:6px 10px;border-radius:8px;margin-bottom:8px}
+.dim-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f3f4f6;font-size:15px;gap:10px}
+.dim-row:last-child{border-bottom:none}
+.dim-row .dn{flex:1;color:#374151}
+.dim-row .dv{font-weight:800;color:#2563eb;font-variant-numeric:tabular-nums}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;background:#e5e7eb;padding:5px;border-radius:14px}
+.tabs button{height:44px;border-radius:10px;border:none;background:transparent;font-size:15px;font-weight:700;color:#6b7280;font-family:inherit;cursor:pointer}
+.tabs button.on{background:#fff;color:#2563eb;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.hcard{background:#fff;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 2px 8px rgba(17,24,39,.05)}
+.hrow{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.hrow .nm{flex:1;font-weight:700;font-size:15px}
+.hrow .hs{font-size:20px;font-weight:900;color:#2563eb;font-variant-numeric:tabular-nums}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.chip{background:#f3f4f6;border-radius:6px;padding:2px 7px;font-size:12px;color:#4b5563;font-variant-numeric:tabular-nums}
+.chip b{color:#1f2937}
+.scene-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px}
+.scene-head .sh-t{flex:1}
+.scene-head .sh-n{font-weight:800;font-size:17px}
+.obj-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid #f3f4f6}
+.obj-info{flex:1;min-width:0}
+.obj-name{font-weight:700;font-size:15px;margin-bottom:3px;word-break:break-all}
+.obj-meta{font-size:12.5px;color:#6b7280;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.obj-meta b{color:#1f2937;font-variant-numeric:tabular-nums}
+.obj-meta .final b{color:#dc2626;font-size:14px}
+.obj-btns{display:flex;flex-direction:column;gap:6px}
+#mask{position:fixed;inset:0;background:rgba(17,24,39,.55);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
+#mask.show{display:flex}
+#modal{background:#fff;border-radius:18px;width:100%;max-width:560px;max-height:86vh;display:flex;flex-direction:column;overflow:hidden}
+#modalHead{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid #e5e7eb}
+#modalTitle{flex:1;font-weight:800;font-size:17px}
+#modalClose{width:36px;height:36px;border-radius:50%;border:none;background:#f3f4f6;font-size:20px;line-height:1;color:#6b7280;font-family:inherit;cursor:pointer}
+#modalBody{padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.rule-sec{margin-bottom:16px}
+.rule-sec h4{margin:0 0 8px;font-size:15px;color:#1d4ed8}
+.rule-item{border-left:3px solid #dbeafe;padding:6px 0 6px 10px;margin-bottom:8px;font-size:13.5px}
+.rule-item .rn{font-weight:800;color:#1f2937}
+.rule-item .rh{color:#047857;margin:4px 0 2px}
+.rule-item .rl{color:#b91c1c}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <button id="backBtn" onclick="back()">‹</button>
+    <div id="ttl">打分系统</div>
+    <div style="width:44px"></div>
+  </header>
+  <main id="main"></main>
+</div>
+
+<div id="mask" onclick="if(event.target===this)closeModal()">
+  <div id="modal">
+    <div id="modalHead">
+      <div id="modalTitle">标题</div>
+      <button id="modalClose" onclick="closeModal()">×</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const TOPIC_DIMS = [
+  {key:'1.1',code:'1.1',group:'维度一 · 内容架构（30分）',name:'逻辑主线完整，厘清整体思路',hi:'开篇明确提出待解决核心问题；内容围绕既定逻辑逐层推进；成因分析详实，对策与成因逻辑匹配；结尾完成内容总结闭环，受众可复述核心观点。',lo:'内容逻辑零散，无统一主线；仅罗列现象未剖析根源，或对策空泛流于口号；展示结束后受众无法提炼核心主旨。'},
+  {key:'1.2',code:'1.2',group:'维度一 · 内容架构（30分）',name:'内容严谨准确，无知识性偏差',hi:'概念释义精准，数据统计口径统一，核心要点覆盖全面，不存在知识性错误。',lo:'核心概念释义错误或表述模糊，引用数据前后矛盾，关键内容存在明显缺漏。'},
+  {key:'1.3',code:'1.3',group:'维度一 · 内容架构（30分）',name:'论据有据可依，规范标注来源',hi:'关键结论均具备权威文献或可信案例支撑，通过图文或文末统一标注资料出处，可应答资料来源相关问询。',lo:'观点多为主观臆断，无法说明资料来源；引用素材来源虚构或权威性不足。'},
+  {key:'2.1',code:'2.1',group:'维度二 · 表达呈现（40分）',name:'语言表述通顺，信息传递清晰',hi:'语速节奏适中，用语规范精准，语句表意完整；段落衔接过渡自然，受众可完整跟随展示逻辑。',lo:'语速失调、表述含糊，冗余口头表述较多；内容跳转无序，受众难以抓取核心信息。'},
+  {key:'2.2',code:'2.2',group:'维度二 · 表达呈现（40分）',name:'宣讲脱离文稿，杜绝照本宣科',hi:'实现基本脱稿，可与受众开展眼神交互，宣讲流畅自然；允许少量查阅提示材料，不干扰整体展示效果。',lo:'全程阅读文稿或演示文档，视线长期聚焦书面载体，以朗读替代宣讲。'},
+  {key:'2.3',code:'2.3',group:'维度二 · 表达呈现（40分）',name:'现场台风得体，注重双向交互',hi:'保持与受众眼神沟通，肢体手势自然，合理设置停顿与重点强调，有效吸引受众注意力。',lo:'长期低头，肢体姿态僵硬，表情呆板，机械复述内容，无现场交互氛围。'},
+  {key:'2.4',code:'2.4',group:'维度二 · 表达呈现（40分）',name:'严格把控时长，恪守时限要求',hi:'充分利用规定时长（35—40分钟），完整完成内容宣讲与收尾工作，无赶进度、拖沓延误情况。',lo:'因严重超时被终止展示；或未达最低时限即仓促收尾，结尾内容缺失。'},
+  {key:'3.1',code:'3.1',group:'维度三 · 价值实效（30分）',name:'理论支撑充分，论证逻辑扎实',hi:'能够明确阐述支撑内容的理论或研究成果名称及核心要义，理论与展示主题高度契合。',lo:'内容仅依托个人经验，无理论支撑；强行套用和主题无关的专业术语。'},
+  {key:'3.2',code:'3.2',group:'维度三 · 价值实效（30分）',name:'方法贴合实际，具备实操价值',hi:'提供明确操作步骤、参考话术、执行清单等可直接落地的工具方法，贴合参训人员现实场景。',lo:'仅输出宏观倡导类表述，无具体执行路径，参训人员听完无法落地实践。'},
+  {key:'3.3',code:'3.3',group:'维度三 · 价值实效（30分）',name:'设计互动环节，调动现场氛围',hi:'合理设置提问、案例代入等互动形式，引导参训人员反馈，现场氛围活跃。',lo:'全程单向输出，漠视受众反馈，出现冷场未采取任何干预措施。'}
+];
+
+const ACTIVITY_DIMS = [
+  {key:'1.1',code:'1.1',group:'维度一 · 策划筹备（30分）',name:'目标定位明晰，活动类型适配',hi:'活动开篇阐明本次训练目标；全部环节设计服务于预设目标；破冰、沟通、协作等活动类型与实施内容保持统一。',lo:'训练目标模糊笼统；活动环节设计与预设主题定位相互背离。'},
+  {key:'1.2',code:'1.2',group:'维度一 · 策划筹备（30分）',name:'规则阐释明了，配套示范指引',hi:'精简凝练阐释活动规则，配套操作示范或实例说明；参与者快速领会执行要求，实施过程争议较少。',lo:'规则表述繁复晦涩，经多次解释参与者仍存疑问；活动推进分歧频发，参与者执行方向不明。'},
+  {key:'1.3',code:'1.3',group:'维度一 · 策划筹备（30分）',name:'物料筹备充分，保障活动开展',hi:'道具、纸笔、演示材料等物资全部提前就位，活动推进物资供给顺畅，不发生流程中断。',lo:'现场物资缺失，临时搜寻物料，造成活动进度延误。'},
+  {key:'2.1',code:'2.1',group:'维度二 · 实施管控（40分）',name:'流程衔接顺畅，按期完成实施',hi:'各环节过渡有序，无冷场、拖沓现象，50分钟内完整完成开场至收尾全流程。',lo:'环节推进卡顿，多次出现冷场；严重超时或仓促终止活动。'},
+  {key:'2.2',code:'2.2',group:'维度二 · 实施管控（40分）',name:'推动全员参与，激活现场状态',hi:'通过任务分工、结对协作、定向引导等方式，带动包含内向人员在内的多数参训者投入活动，现场有序活跃。',lo:'仅少数人员参与活动，大部分参训人员旁观或从事无关行为，现场氛围冷清。'},
+  {key:'2.3',code:'2.3',group:'维度二 · 实施管控（40分）',name:'指令传递清晰，及时纠偏引导',hi:'任务指令简洁明确；参与者行为偏离目标时可及时提醒引导回归主线，演示说明到位。',lo:'任务指令表述模糊，经反复解释仍存在理解障碍；现场出现偏差未实施干预。'},
+  {key:'2.4',code:'2.4',group:'维度二 · 实施管控（40分）',name:'处置突发状况，稳住现场局面',hi:'有效化解冷场，调解现场争执，妥善处置各类突发状况，整体活动节奏不受扰动。',lo:'遭遇突发状况处置失当，造成现场局面失控。'},
+  {key:'3.1',code:'3.1',group:'维度三 · 复盘升华（30分）',name:'落实复盘小结，形成活动闭环',hi:'活动末尾开展复盘小结，梳理活动过程与训练收获。',lo:'活动结束直接解散，未设置任何复盘收尾环节。'},
+  {key:'3.2',code:'3.2',group:'维度三 · 复盘升华（30分）',name:'引导参训人员，分享体验感悟',hi:'主动发起提问，引导参训人员反馈体验与收获，参训人员自愿开展分享交流。',lo:'未设置参训人员发言环节，参与者无表达个人感受的渠道。'},
+  {key:'3.3',code:'3.3',group:'维度三 · 复盘升华（30分）',name:'联结工作场景，转化实践经验',hi:'清晰阐释活动所得经验方法在实际工作中的应用路径，实现体验向工作能力转化。',lo:'活动体验与培训主题、实际工作场景完全割裂。'}
+];
+
+const API = {
+  async get(url){ const r = await fetch(url); if(!r.ok) throw new Error(await r.text()); return r.json(); },
+  async post(url, body){ const r = await fetch(url, {method:'POST',headers:{'Content-Type':'application/json'},body: JSON.stringify(body)}); const data = await r.json().catch(()=>({})); if(!r.ok) throw new Error(data.error || '请求失败'); return data; },
+  async del(url){ const r = await fetch(url, {method:'DELETE'}); if(!r.ok) throw new Error(await r.text()); return r.json(); }
+};
+
+const state = {
+  view:'role', role:null, group:null, type:null, scenes:[], objects:[], overview:{}, wizard:null, result:null, historyTab:'scores', teacherName: localStorage.getItem('teacherName') || '教师'
+};
+let navStack = [];
+
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fmt(ts){ if(!ts) return '—'; const d = new Date(Number(ts)); const p = n => String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`; }
+
+async function loadBasics(){
+  const [scenes, objects, overview] = await Promise.all([API.get('/api/scenes'), API.get('/api/objects'), API.get('/api/overview')]);
+  state.scenes = scenes; state.objects = objects; state.overview = {};
+  overview.forEach(o => { state.overview[o.object_id] = o; });
+}
+
+async function go(view){ if(state.view !== view) navStack.push(state.view); state.view = view; await render(); }
+async function back(){ state.view = navStack.pop() || 'role'; await render(); }
+
+async function render(){
+  const map = {
+    role: () => ({ title:'打分系统', back:false, html: vRole() }),
+    studentHome: () => ({ title:'学员端', html: vStudentHome() }),
+    teacherHome: async () => { await loadBasics(); return { title:'教师端', html: vTeacherHome() }; },
+    objectList: async () => {
+      await loadBasics();
+      let myMap = {};
+      if(state.role === 'student' && state.group){
+        const my = await API.get('/api/my-scores?group=' + state.group);
+        my.forEach(m => { myMap[m.object_id] = m.total; });
+      }
+      return { title: state.type==='topic' ? '专题打分' : '活动打分', html: vObjectList(myMap) };
+    },
+    wizard: () => ({ title:'逐项打分', html: vWizard() }),
+    result: async () => ({ title:'打分结果', html: await vResult() }),
+    history: async () => ({ title:'历史记录', html: await vHistory() })
+  };
+  const fn = map[state.view] || map.role;
+  const def = await fn();
+  document.getElementById('ttl').textContent = def.title;
+  document.getElementById('main').innerHTML = def.html;
+  document.getElementById('backBtn').style.visibility = def.back === false ? 'hidden' : 'visible';
+  window.scrollTo(0,0);
+}
+
+function vRole(){
+  return `<div class="hero"><div class="ic">📊</div><h1>专题展示与活动组织</h1><p>实时打分系统 · 扫码即用</p></div>
+  <div class="card" style="margin-top:22px"><button class="btn primary" onclick="enterRole('teacher')">👨‍🏫 教师端</button><button class="btn" onclick="enterRole('student')">👥 学员端</button></div>
+  <div class="card"><button class="btn ghost" onclick="openRules()">📖 打分规则介绍</button></div>
+  <p class="sub" style="text-align:center;margin-top:18px">教师端可创建场次 / 录入评价对象 / 覆盖改分 / 生成二维码<br>学员端按组号独立打分，互不可见</p>`;
+}
+async function enterRole(r){ state.role = r; if(r === 'teacher'){ await go('teacherHome'); }else{ const g = Number(localStorage.getItem('group')); state.group = (g >= 1 && g <= 5) ? g : null; await go('studentHome'); } }
+
+function vStudentHome(){
+  const g = state.group;
+  return `<div class="card"><div class="lbl">① 选择你的组号（各组成员互不可见）</div><div class="group-picker">${[1,2,3,4,5].map(i => `<button class="${g===i?'on':''}" onclick="setGroup(${i})">${i}组</button>`).join('')}</div>${g ? `<p class="sub" style="margin:10px 0 0">当前身份：<b style="color:#2563eb">第 ${g} 组</b></p>` : `<p class="sub" style="margin:10px 0 0;color:#dc2626">请先选择组号后再开始打分</p>`}</div>
+  <div class="card"><div class="lbl">② 选择打分类型</div><button class="entry topic" onclick="enterScoring('topic')"><span class="ic">🎤</span><span class="tx">专题打分<small>内容架构 · 表达呈现 · 价值实效（10 项 / 100 分）</small></span></button><button class="entry activity" onclick="enterScoring('activity')"><span class="ic">🤝</span><span class="tx">活动打分<small>策划筹备 · 实施管控 · 复盘升华（10 项 / 100 分）</small></span></button></div>
+  <div class="grid2"><button class="btn ghost" onclick="openRules()">📖 打分规则</button><button class="btn ghost" onclick="openHistory()">🕘 历史记录</button></div>`;
+}
+function setGroup(g){ state.group = g; localStorage.setItem('group', String(g)); render(); }
+async function enterScoring(t){ if(!state.group){ alert('请先在上方选择你的组号'); return; } state.type = t; await go('objectList'); }
+
+function vObjectList(myMap){
+  myMap = myMap || {}; const list = state.objects.filter(o => o.type === state.type);
+  if(!list.length) return `<div class="card" style="text-align:center;padding:40px 16px"><div style="font-size:40px">📭</div><p style="margin:10px 0;color:#6b7280">暂无评价对象</p><p class="sub">请教师端先创建场次并添加评价对象</p></div>`;
+  let html = `<div class="card"><div class="lbl">请选择要打分的评价对象</div>`;
+  state.scenes.forEach(sc => {
+    const objs = list.filter(o => o.scene_id === sc.id); if(!objs.length) return;
+    html += `<div style="margin:6px 0 12px"><div style="font-size:13px;font-weight:800;color:#1d4ed8;margin-bottom:8px">${esc(sc.name)}</div>`;
+    objs.forEach(o => {
+      const done = myMap[o.id] != null;
+      html += `<div class="obj-item" onclick="startStudentWizard('${o.id}')"><div class="nm">${esc(o.name)}<div class="st ${done?'done':''}">${done ? '✅ 已打分 '+myMap[o.id]+' 分（点击可重新打分）' : '点击开始逐项打分'}</div></div><div class="arrow">›</div></div>`;
+    });
+    html += `</div>`;
+  });
+  html += `</div><div class="grid2"><button class="btn ghost" onclick="openRules()">📖 打分规则</button><button class="btn ghost" onclick="openHistory()">🕘 历史记录</button></div>`;
+  return html;
+}
+
+async function startStudentWizard(objectId){
+  const obj = state.objects.find(o => o.id === objectId); if(!obj) return;
+  const data = await API.get('/api/scores/' + objectId);
+  const mine = data.students.find(s => s.grp === String(state.group));
+  startWizard(obj.type, objectId, 'student', mine ? mine.items : {});
+}
+async function teacherScore(objectId){
+  const obj = state.objects.find(o => o.id === objectId); if(!obj) return;
+  const data = await API.get('/api/scores/' + objectId);
+  if(data.teacher && data.overrides.length >= 3){
+    openModal('覆盖次数已用完', `<p>该对象的教师评分已完成 <b>3 次</b> 覆盖修改，系统已锁定。</p><div style="margin-top:12px">${data.overrides.map((o,i) => `<div class="calc-line"><span>第 ${i+1} 次 · ${esc(o.by_name)}</span><b>${o.from_score} → ${o.to_score}</b></div><div class="sub" style="margin:-4px 0 8px">${fmt(o.at)}</div>`).join('')}</div>`);
+    return;
+  }
+  startWizard(obj.type, objectId, 'teacher', data.teacher ? data.teacher.items : {});
+}
+function startWizard(type, objectId, role, initScores){
+  const dims = type === 'topic' ? TOPIC_DIMS : ACTIVITY_DIMS;
+  state.wizard = { type, objectId, role, dims, idx: 0, scores: Object.assign({}, initScores || {}) };
+  go('wizard');
+}
+function vWizard(){
+  const w = state.wizard; if(!w) return '<div class="card">无打分数据</div>';
+  const d = w.dims[w.idx]; const cur = w.scores[d.key];
+  const answered = w.dims.filter(x => w.scores[x.key] !== undefined).length;
+  const obj = state.objects.find(o => o.id === w.objectId);
+  const pct = (w.idx / w.dims.length) * 100;
+  return `<div class="wiz-count"><span>第 ${w.idx+1} / ${w.dims.length} 题</span><span>已答 ${answered} / ${w.dims.length}</span></div><div class="bar"><i style="width:${pct}%"></i></div>
+  <div class="sub" style="margin-bottom:6px">${esc(obj ? obj.name : '')} · ${w.role==='teacher' ? '教师评分' : '第 '+state.group+' 组'}</div>
+  <div class="group-tag">${esc(d.group)}</div><h2 class="q-title">${esc(d.code)}　${esc(d.name)}</h2>
+  <div class="hint good"><div class="h-t">✅ 满分（10 分）表现</div><p>${esc(d.hi)}</p></div>
+  <div class="hint bad"><div class="h-t">❌ 0 分表现</div><p>${esc(d.lo)}</p></div>
+  <div class="lbl" style="margin-top:16px">请打分（0 — 10 分）</div>
+  <div class="score-grid">${Array.from({length:11},(_,i)=>i).map(v => `<button class="${cur===v?'on':''}" onclick="wizPick(${v})">${v}</button>`).join('')}</div>
+  <div class="wiz-nav"><button class="btn ghost" onclick="wizPrev()" ${w.idx===0?'disabled':''}>上一题</button>${w.idx < w.dims.length - 1 ? `<button class="btn primary" onclick="wizNext()" ${cur===undefined?'disabled':''}>下一题</button>` : `<button class="btn success" onclick="wizSubmit()" ${cur===undefined?'disabled':''}>提　交</button>`}</div>`;
+}
+function wizPick(v){ const w = state.wizard; w.scores[w.dims[w.idx].key] = v; const y = window.scrollY; render().then(() => window.scrollTo(0, y)); }
+function wizNext(){ const w = state.wizard; if(w.scores[w.dims[w.idx].key] === undefined){ alert('请先为本题打分'); return; } if(w.idx < w.dims.length - 1){ w.idx++; render(); } }
+function wizPrev(){ const w = state.wizard; if(w.idx > 0){ w.idx--; render(); } }
+
+async function wizSubmit(){
+  const w = state.wizard; const missing = w.dims.filter(d => w.scores[d.key] === undefined);
+  if(missing.length){ alert('还有 '+missing.length+' 个维度未评分，请返回补全'); return; }
+  const items = {}; let total = 0; w.dims.forEach(d => { items[d.key] = w.scores[d.key]; total += w.scores[d.key]; });
+  const obj = state.objects.find(o => o.id === w.objectId);
+  const objName = obj ? obj.name : '（已删除对象）';
+  try{
+    const body = { object_id: w.objectId, type: w.type, role: w.role, group: w.role === 'teacher' ? 'teacher' : String(state.group), items, total };
+    if(w.role === 'teacher') body.teacher_name = state.teacherName || '教师';
+    const res = await API.post('/api/scores', body);
+    if(!res.ok && res.error){ alert(res.error); return; }
+    state.result = { role: w.role, group: state.group, total, items, dims: w.dims, objectName: objName, type: w.type, objectId: w.objectId };
+    navStack = [state.role === 'teacher' ? 'teacherHome' : 'studentHome']; state.view = 'result'; await render();
+  }catch(e){ alert('提交失败：' + e.message); }
+}
+
+async function vResult(){
+  const r = state.result; if(!r) return '<div class="card">暂无结果</div>';
+  const groups = {}; r.dims.forEach(d => { (groups[d.group] = groups[d.group] || []).push(d); });
+  let html = `<div class="card"><div class="big-score">${r.total}<small>分</small></div><p class="sub" style="text-align:center;margin:8px 0 0">${esc(r.objectName)} · ${r.type === 'topic' ? '专题展示' : '活动组织'} · ${r.role === 'teacher' ? '教师评分' : '第 ' + r.group + ' 组'}</p></div>`;
+  if(r.role === 'teacher'){
+    const c = await API.get('/api/scores/' + r.objectId);
+    if(c.avg != null && c.teacher_total != null){
+      html += `<div class="card"><div class="lbl">最终得分构成</div><div class="big-score" style="font-size:46px">${c.final.toFixed(1)}<small>分</small></div><div style="margin-top:12px"><div class="calc-line"><span>学员均分</span><b>${c.avg.toFixed(2)} × 40% = ${(c.avg*0.4).toFixed(2)}</b></div><div class="calc-line"><span>教师评分</span><b>${c.teacher_total} × 60% = ${(c.teacher_total*0.6).toFixed(2)}</b></div><div class="calc-line"><span>参与打分组数</span><b>${c.students.length} 组</b></div><div class="calc-line"><span>教师覆盖次数</span><b>${c.overrides.length} / 3</b></div></div></div>`;
+    }else{ html += `<div class="card"><p class="sub">尚缺学员或教师评分，最终分待计算。</p></div>`; }
+  }
+  html += `<div class="card"><div class="lbl">分项得分明细</div>`;
+  Object.keys(groups).forEach(gk => { html += `<div class="dim-block"><div class="dh">${esc(gk)}</div>`; groups[gk].forEach(d => { html += `<div class="dim-row"><div class="dn">${esc(d.code)}　${esc(d.name)}</div><div class="dv">${r.items[d.key]} / 10</div></div>`; }); html += `</div>`; });
+  html += `</div><div class="grid2"><button class="btn ghost" onclick="openHistory()">🕘 历史记录</button><button class="btn primary" onclick="back()">返　回</button></div>`;
+  return html;
+}
+
+function vTeacherHome(){
+  let html = `<div class="card"><div class="lbl">教师姓名（覆盖修改留痕用）</div><input class="inp" value="${esc(state.teacherName)}" oninput="setTeacherName(this.value)" placeholder="请输入教师姓名"></div>`;
+  if(!state.scenes.length) html += `<div class="card" style="text-align:center;padding:30px 16px"><div style="font-size:36px">📋</div><p class="sub">还没有场次，点击下方按钮创建</p></div>`;
+  state.scenes.forEach(sc => {
+    const objs = state.objects.filter(o => o.scene_id === sc.id);
+    html += `<div class="card"><div class="scene-head"><div class="sh-t"><div class="sh-n">${esc(sc.name)}</div><div class="sub">${objs.length} 个评价对象 · 创建于 ${fmt(sc.created_at)}</div></div><button class="mini" onclick="addObject('${sc.id}')">+ 对象</button><button class="mini danger" onclick="delScene('${sc.id}')">删除</button></div>`;
+    if(!objs.length) html += `<p class="sub" style="padding:10px 0">暂无评价对象，点击「+ 对象」添加</p>`;
+    objs.forEach(o => {
+      const c = state.overview[o.id] || {avg:null, teacher_total:null, final:null, student_count:0, override_count:0};
+      html += `<div class="obj-row"><div class="obj-info"><div class="obj-name">${esc(o.name)} <span class="tag ${o.type}">${o.type === 'topic' ? '专题' : '活动'}</span></div><div class="obj-meta"><span>学员均分 <b>${c.avg != null ? c.avg.toFixed(1) : '—'}</b>（${c.student_count}组）</span><span>教师 <b>${c.teacher_total != null ? c.teacher_total : '—'}</b></span><span class="final">最终 <b>${c.final != null ? c.final.toFixed(1) : '—'}</b></span></div></div><div class="obj-btns"><button class="mini primary" onclick="teacherScore('${o.id}')">${c.teacher_total != null ? '覆盖 ' + c.override_count + '/3' : '打分'}</button><button class="mini" onclick="showDetail('${o.id}')">明细</button></div></div>`;
+    });
+    html += `</div>`;
+  });
+  html += `<button class="btn primary" onclick="addScene()">＋ 新建场次</button><div class="grid2" style="margin-top:10px"><button class="btn ghost" onclick="openRules()">📖 打分规则</button><button class="btn ghost" onclick="openHistory()">🕘 历史记录</button></div><div class="grid2" style="margin-top:10px"><button class="btn ghost" onclick="openQR()">🔗 生成二维码</button><button class="btn danger" onclick="resetAll()">🗑 清空数据</button></div>`;
+  return html;
+}
+function setTeacherName(v){ state.teacherName = v || '教师'; localStorage.setItem('teacherName', state.teacherName); }
+async function addScene(){ const name = prompt('请输入场次名称', '第 ' + (state.scenes.length + 1) + ' 场'); if(!name || !name.trim()) return; await API.post('/api/scenes', {name: name.trim()}); await go('teacherHome'); }
+async function delScene(id){ if(!confirm('确定删除该场次？其下所有评价对象与打分记录将一并删除，不可恢复。')) return; await API.del('/api/scenes/' + id); await go('teacherHome'); }
+async function addObject(sceneId){ const name = prompt('请输入评价对象名称\n例如：第1组 / 破冰活动《认识你》'); if(!name || !name.trim()) return; const type = confirm('请选择评价类型：\n\n【确定】= 专题展示\n【取消】= 活动组织') ? 'topic' : 'activity'; await API.post('/api/objects', {scene_id: sceneId, name: name.trim(), type}); await go('teacherHome'); }
+async function resetAll(){ if(!confirm('确定清空全部数据？包括场次、对象、打分与覆盖记录，不可恢复！')) return; const scenes = await API.get('/api/scenes'); for(const sc of scenes){ await API.del('/api/scenes/' + sc.id); } await go('teacherHome'); }
+
+async function showDetail(objectId){
+  const obj = state.objects.find(o => o.id === objectId); if(!obj) return;
+  const c = await API.get('/api/scores/' + objectId);
+  const dims = obj.type === 'topic' ? TOPIC_DIMS : ACTIVITY_DIMS;
+  let html = `<div style="margin-bottom:14px"><span class="tag ${obj.type}">${obj.type === 'topic' ? '专题展示' : '活动组织'}</span><b style="margin-left:6px">${esc(obj.name)}</b></div><div class="card" style="box-shadow:none;background:#f9fafb;padding:12px"><div class="calc-line"><span>学员均分（${c.students.length} 组）</span><b>${c.avg != null ? c.avg.toFixed(2) : '—'}</b></div><div class="calc-line"><span>教师评分</span><b>${c.teacher_total != null ? c.teacher_total : '—'}</b></div><div class="calc-line"><span>最终分（40% + 60%）</span><b style="color:#dc2626;font-size:17px">${c.final != null ? c.final.toFixed(2) : '—'}</b></div></div><div class="lbl" style="margin-top:14px">各维度明细</div>`;
+  dims.forEach(d => { const vals = c.students.map(s => s.items[d.key]).filter(v => v != null); const avg = vals.length ? (vals.reduce((a,b)=>a+b,0) / vals.length).toFixed(1) : '—'; const tv = c.teacher && c.teacher.items[d.key] != null ? c.teacher.items[d.key] : '—'; html += `<div class="calc-line"><span style="font-size:13px">${esc(d.code)} ${esc(d.name)}</span><b style="font-size:13px">学员 ${avg} / 教师 ${tv}</b></div>`; });
+  html += `<div class="lbl" style="margin-top:14px">各学员组打分</div>`;
+  if(!c.students.length) html += `<p class="sub">暂无学员打分</p>`;
+  else { c.students.slice().sort((a,b)=>Number(a.grp)-Number(b.grp)).forEach(s => { html += `<div class="calc-line"><span>第 ${s.grp} 组</span><b>${s.total} 分 <span class="sub" style="font-weight:400">${fmt(s.updated_at)}</span></b></div>`; }); }
+  if(c.overrides.length){ html += `<div class="lbl" style="margin-top:14px">教师覆盖修改记录</div>`; c.overrides.forEach((o,i) => { html += `<div class="calc-line"><span>第 ${i+1} 次 · ${esc(o.by_name)}</span><b>${o.from_score} → ${o.to_score}</b></div><div class="sub" style="margin:-4px 0 8px">${fmt(o.at)}</div>`; }); }
+  html += `<div style="margin-top:18px"><button class="btn danger" onclick="delObject('${obj.id}')">删除该评价对象</button></div>`;
+  openModal('评价对象明细', html);
+}
+async function delObject(id){ if(!confirm('确定删除该评价对象及其全部打分记录？')) return; await API.del('/api/objects/' + id); closeModal(); await go('teacherHome'); }
+
+async function openHistory(){ state.historyTab = 'scores'; await go('history'); }
+function setHistTab(t){ state.historyTab = t; render(); }
+async function vHistory(){
+  const isTeacher = state.role === 'teacher'; const tab = state.historyTab;
+  const [scores, overrides] = await Promise.all([API.get('/api/all-scores'), API.get('/api/all-overrides')]);
+  let html = `<div class="tabs"><button class="${tab === 'scores' ? 'on' : ''}" onclick="setHistTab('scores')">打分记录</button><button class="${tab === 'logs' ? 'on' : ''}" onclick="setHistTab('logs')">修改日志</button></div>`;
+  if(tab === 'scores'){
+    let recs = isTeacher ? scores : scores.filter(r => r.role === 'student' && r.grp === String(state.group));
+    if(!recs.length) html += `<div class="card" style="text-align:center;padding:36px 16px"><div style="font-size:36px">🗂</div><p class="sub">暂无打分记录</p></div>`;
+    recs.forEach(r => {
+      const obj = state.objects.find(o => o.id === r.object_id); const dims = r.type === 'topic' ? TOPIC_DIMS : ACTIVITY_DIMS;
+      html += `<div class="hcard"><div class="hrow"><span class="tag ${r.type}">${r.type === 'topic' ? '专题' : '活动'}</span><span class="nm">${esc(obj ? obj.name : '（已删除对象）')}</span><span class="hs">${r.total}</span></div><div class="sub">${r.role === 'teacher' ? '教师评分' : '第 ' + esc(r.grp) + ' 组学员'} · ${fmt(r.updated_at)}</div><div class="chips">${dims.map(d => `<span class="chip">${esc(d.code)} <b>${r.items[d.key] != null ? r.items[d.key] : '—'}</b></span>`).join('')}</div></div>`;
+    });
+  }else{
+    if(!overrides.length) html += `<div class="card" style="text-align:center;padding:36px 16px"><div style="font-size:36px">📝</div><p class="sub">暂无教师覆盖修改记录</p></div>`;
+    overrides.forEach(l => { const obj = state.objects.find(o => o.id === l.object_id); html += `<div class="hcard"><div class="hrow"><span class="nm" style="font-size:14px"><b>${esc(l.by_name)}</b> 修改「${esc(obj ? obj.name : '（已删除对象）')}」</span></div><div style="font-size:15px;margin:6px 0">教师评分由 <b style="color:#dc2626">${l.from_score}</b> 改为 <b style="color:#059669">${l.to_score}</b></div><div class="sub">${fmt(l.at)}</div></div>`; });
+  }
+  html += `<div style="margin-top:14px"><button class="btn ghost" onclick="back()">返　回</button></div>`; return html;
+}
+
+function openRules(){
+  let html = `<div class="card" style="box-shadow:none;background:#eff6ff;padding:12px;margin-bottom:14px"><p style="margin:0;font-size:14px"><b>计分规则：</b>每位学员按 10 个维度逐项打分（每项 0-10 分，合计 100 分）；5 组学员对同一对象的平均分为「学员均分」；<br><b style="color:#dc2626">最终分 = 学员均分 × 40% + 教师评分 × 60%</b><br>教师评分最多可覆盖修改 3 次，每次修改自动重算最终分并留痕。</p></div>`;
+  html += `<div class="rule-sec"><h4>🎤 专题展示评价量表（满分 100 分）</h4>`;
+  TOPIC_DIMS.forEach(d => { html += `<div class="rule-item"><div class="rn">${esc(d.code)}　${esc(d.name)}　<span style="color:#6b7280;font-weight:400">（10分）</span></div><div class="rh">✔ 满分表现：${esc(d.hi)}</div><div class="rl">✘ 0 分表现：${esc(d.lo)}</div></div>`; });
+  html += `</div><div class="rule-sec"><h4>🤝 活动组织评价量表（满分 100 分）</h4><p class="sub" style="margin:0 0 8px">组织开展 50 分钟团队培训活动，活动类型包含破冰融合、团队沟通、协同协作等。</p>`;
+  ACTIVITY_DIMS.forEach(d => { html += `<div class="rule-item"><div class="rn">${esc(d.code)}　${esc(d.name)}　<span style="color:#6b7280;font-weight:400">（10分）</span></div><div class="rh">✔ 满分表现：${esc(d.hi)}</div><div class="rl">✘ 0 分表现：${esc(d.lo)}</div></div>`; });
+  html += `</div>`; openModal('打分规则介绍', html);
+}
+function openQR(){ const url = location.href.split('#')[0]; const img = 'https://api.qrserver.com/v1/create-qr-code/?size=360x360&margin=12&data=' + encodeURIComponent(url); openModal('扫码进入打分系统', `<div style="text-align:center"><img src="${img}" style="width:100%;max-width:300px;border:1px solid #e5e7eb;border-radius:14px" alt="二维码"><p style="font-size:12.5px;color:#6b7280;word-break:break-all;margin:12px 0 4px">${esc(url)}</p><button class="btn ghost" style="margin-top:8px" onclick="copyQR('${esc(url)}')">📋 复制链接</button></div>`); }
+function copyQR(url){ if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(() => alert('链接已复制'), () => alert('复制失败，请手动选择复制')); }else{ const ta = document.createElement('textarea'); ta.value = url; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); alert('链接已复制'); }catch(e){ alert('复制失败，请手动选择复制'); } document.body.removeChild(ta); } }
+function openModal(title, html){ document.getElementById('modalTitle').textContent = title; document.getElementById('modalBody').innerHTML = html; document.getElementById('mask').classList.add('show'); }
+function closeModal(){ document.getElementById('mask').classList.remove('show'); }
+
+(async function boot(){ try{ await loadBasics(); }catch(e){ console.error('初始化失败', e); } await render(); })();
+</script>
+</body>
+</html>
